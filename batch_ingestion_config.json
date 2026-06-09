@@ -1,0 +1,75 @@
+{
+  "description": "Example batch ingestion configuration for Fabric data pipeline",
+  "workspace": {
+    "id": "workspace-001",
+    "name": "MyFabricWorkspace",
+    "lakehouse": "data_lakehouse"
+  },
+  "ingestions": [
+    {
+      "type": "CSV",
+      "source": "data/customers.csv",
+      "table_name": "customers",
+      "encoding": "utf-8",
+      "mode": "overwrite",
+      "description": "Customer dimension table"
+    },
+    {
+      "type": "CSV",
+      "source": "data/products.csv",
+      "table_name": "products",
+      "encoding": "utf-8",
+      "mode": "overwrite",
+      "description": "Product catalog"
+    },
+    {
+      "type": "CSV",
+      "source": "data/sales_transactions.csv",
+      "table_name": "sales_transactions",
+      "encoding": "utf-8",
+      "delimiter": ",",
+      "mode": "overwrite",
+      "description": "Sales transaction facts"
+    },
+    {
+      "type": "SQL_TABLE",
+      "source": "Orders",
+      "table_name": "orders",
+      "schema": "dbo",
+      "description": "Orders from SQL Server"
+    },
+    {
+      "type": "SQL_TABLE",
+      "source": "Payments",
+      "table_name": "payments",
+      "schema": "dbo",
+      "description": "Payment transactions"
+    },
+    {
+      "type": "SQL",
+      "source": "SELECT * FROM dbo.OrderDetails WHERE UnitPrice > 100",
+      "table_name": "high_value_items",
+      "mode": "overwrite",
+      "description": "High value order items"
+    },
+    {
+      "type": "SQL",
+      "source": "SELECT o.OrderID, o.OrderDate, c.CustomerName, SUM(od.Quantity * od.UnitPrice) as TotalAmount FROM dbo.Orders o JOIN dbo.Customers c ON o.CustomerID = c.CustomerID JOIN dbo.OrderDetails od ON o.OrderID = od.OrderID WHERE o.OrderDate >= '2024-01-01' GROUP BY o.OrderID, o.OrderDate, c.CustomerName",
+      "table_name": "sales_summary_2024",
+      "mode": "overwrite",
+      "description": "2024 sales summary by customer"
+    }
+  ],
+  "sql_connection": {
+    "server": "your_sql_server.database.windows.net",
+    "database": "SalesDB",
+    "driver": "ODBC Driver 17 for SQL Server",
+    "notes": "Credentials should be stored in .env file, not committed to source control"
+  },
+  "error_handling": {
+    "skip_on_error": false,
+    "log_level": "INFO",
+    "save_report": true,
+    "report_path": "ingestion_reports/"
+  }
+}
